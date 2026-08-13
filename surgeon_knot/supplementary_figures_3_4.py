@@ -359,8 +359,11 @@ def plot_FIG3(mu, out_stem="FIG3_baseline_failure", key="60_ni3"):
     ax.set_ylim(ybot * 0.4, ytop * 4.0)
     epad = 0.04 * (a["e_mm"].max() - a["e_mm"].min())
     ax.set_xlim(a["e_mm"].min() - epad, a["e_mm"].max() + epad)
-    ax.set_xlabel(r"end-to-end shortening, $e$ (mm)", fontsize=9)
-    ax.set_ylabel(r"normalized pulling force,  $F\,h^{2}/EI$", fontsize=9)
+    # Panel label (a) in the upper-left, same (cmr) font as the rest.
+    ax.text(0.03, 0.98, "(a)", transform=ax.transAxes,
+            fontsize=10, va="top", ha="left")
+    ax.set_xlabel(r"End-to-end shortening, $e$ (mm)", fontsize=9)
+    ax.set_ylabel(r"Normalized pulling force,  $F\,h^{2}/EI$", fontsize=9)
     ax.legend(loc="upper right", fontsize=7, frameon=False)
     fig.tight_layout()
     for ext in ("pdf", "svg", "png"):
@@ -418,8 +421,8 @@ def plot_FIG4(mu, out_stem="FIG4_corrected_vs_uncorrected"):
         panel = "(" + chr(ord("a") + keys.index(key)) + ")"
         ax.text(0.04, 0.95, panel, transform=ax.transAxes,
                 fontsize=11, fontweight="bold", va="top", ha="left")
-        ax.set_xlabel(r"end-to-end shortening, $e$ (mm)", fontsize=9)
-        ax.set_ylabel(r"normalized pulling force,  $F\,h^{2}/EI$",
+        ax.set_xlabel(r"End-to-end shortening, $e$ (mm)", fontsize=9)
+        ax.set_ylabel(r"Normalized pulling force,  $F\,h^{2}/EI$",
                       fontsize=9)
         ax.set_title(d["label"], fontsize=9, fontweight="normal")
         # Legend only on the first panel to keep the others uncluttered.

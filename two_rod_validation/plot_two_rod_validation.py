@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Figure plotter for the two-rod difference-problem validation.
+Publication-figure plotter for the two-rod difference-problem validation.
 
 Reads `two_rod_results.txt` (the output of ``sim_two_rod_braid.py``)
 and writes the manuscript figure:
@@ -15,9 +15,16 @@ and writes the manuscript figure:
         simulation points (open red circles) overlaid on the analytical
         prediction 1 + 3 (K/k)^2 + (K/k)^4/2.
 
-    The outlier point at R_curve = 10 mm (K/k ~ 0.38) lies outside the
-    constant-separation difference-problem ansatz and is plotted with
-    a cross to flag it.
+    Every swept point keeps the strand separation at 2h, so all points are
+    plotted as simulation data; the highest-K/k points sit below the bracket
+    as the asymptotic k >> K averaging is left behind.
+
+Style follows the group plotting conventions:
+  - Computer Modern fonts at 10 pt (CMR10 for text, CMMI10 for math),
+    matching the manuscript class.
+  - Figure size 7.0 x 3.0 inches (page width).
+  - Simulation = symbols, theory = solid line.
+  - In-pointing ticks, axes line width 0.8 pt.
 
 The script depends only on numpy and matplotlib (no dismech).  The
 small inline helpers reproduce just enough of the simulation geometry
@@ -92,9 +99,9 @@ PWIDTH, PHEIGHT = 3.5, 3.0   # single-column figure size (inches)
 PWIDTH_2COL = 7.0            # full-page width (two-panel figure)
 
 # Axis labels (kept short here; will be re-typeset in Inkscape).
-XLABEL = r"backbone curvature ratio  $K\,/\,k$"
-YLABEL_KERNEL = r"bending kernel  $\langle |\delta''|^{2} \rangle$  (mm$^{-2}$)"
-YLABEL_PRATIO = r"contact pressure ratio  $P\,/\,P_{\rm straight}$"
+XLABEL = r"Backbone curvature ratio  $K\,/\,k$"
+YLABEL_KERNEL = r"Bending kernel  $\langle |\delta''|^{2} \rangle$  (mm$^{-2}$)"
+YLABEL_PRATIO = r"Contact pressure ratio  $P\,/\,P_{\rm straight}$"
 
 
 # ---------------------------------------------------------------------------
@@ -114,7 +121,6 @@ def load_results(path="two_rod_results.txt"):
         dd_paper   -- (N,) float, h^2 (k^4 + 3 k^2 K^2 + K^4 / 2)
         enh_sim    -- (N,) float, dd_sim / dd_sim[straight]
         enh_paper  -- (N,) float, dd_paper / dd_paper[straight]
-        valid      -- (N,) bool, True except at the geometric-breakdown point
     """
     R_curve, Kk, sim, paper, enh_sim, enh_paper = [], [], [], [], [], []
     with open(path) as fh:
@@ -149,13 +155,8 @@ def load_results(path="two_rod_results.txt"):
     enh_sim = np.array(enh_sim)
     enh_paper = np.array(enh_paper)
 
-    # Mark the geometric-breakdown point (R_curve = 10 mm in this sweep)
-    valid = R_curve > 10.0 + 1e-6  # everything except R_curve = 10
-    # Convention: the straight baseline has R_curve = inf, which is also valid
-    valid |= np.isinf(R_curve)
-
     return dict(R_curve=R_curve, Kk=Kk, dd_sim=sim, dd_paper=paper,
-                enh_sim=enh_sim, enh_paper=enh_paper, valid=valid)
+                enh_sim=enh_sim, enh_paper=enh_paper)
 
 
 # ---------------------------------------------------------------------------
@@ -178,7 +179,7 @@ def paper_dd_squared(Kk, dd_straight):
 
 def _draw_panel(ax, data, mode, theory_label):
     """
-    Draw a single panel: theory curve + simulation symbols (+ outlier).
+    Draw a single panel: analytical curve + simulation symbols.
 
     Parameters
     ----------
@@ -188,9 +189,6 @@ def _draw_panel(ax, data, mode, theory_label):
            "enhancement" -> y = <|delta''|^2> / <|delta''|^2>_str = P / P_straight
     theory_label : legend string for the analytical curve
     """
-    valid = data["valid"]
-    broken = ~valid
-
     Kk_dense = np.linspace(0, max(data["Kk"]) * 1.05, 300)
     if mode == "kernel":
         dd_str = data["dd_paper"][data["Kk"] == 0][0]
@@ -207,16 +205,11 @@ def _draw_panel(ax, data, mode, theory_label):
     ax.plot(Kk_dense, y_theory,
             linestyle="-", color=COLPOS[4], linewidth=1.0,
             label=theory_label)
-    ax.plot(data["Kk"][valid], y_sim[valid],
+    ax.plot(data["Kk"], y_sim,
             linestyle="None", marker="o",
             markerfacecolor="none", markeredgecolor=COLPOS[2],
             markeredgewidth=1.0, markersize=6,
-            label="simulation")
-    if np.any(broken):
-        ax.plot(data["Kk"][broken], y_sim[broken],
-                linestyle="None", marker="x", color=COLPOS[2],
-                markersize=6, markeredgewidth=1.2,
-                label="sim (outside validity)")
+            label="Simulation")
 
     ax.set_xlabel(XLABEL)
     ax.set_ylabel(ylabel)
@@ -224,8 +217,8 @@ def _draw_panel(ax, data, mode, theory_label):
 
     # Place the legend just below the top edge, leaving room for the
     # (a)/(b) panel labels that sit at y = 0.98 in the combined figure.
-    leg = ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.92),
-                    frameon=False, fontsize=8)
+    ax.legend(loc="upper left", bbox_to_anchor=(0.02, 0.92),
+              frameon=False, fontsize=8)
     for sp in ax.spines.values():
         sp.set_visible(True)
 
@@ -237,7 +230,7 @@ def _two_strand_helix_curved(h, R_loop, n_cross=1, pts_per_turn=80,
     pair. Same conventions as make_two_strand_helix in sim_two_rod_braid.py
     (kept inline here so this plotting script has no dismech dependency).
     """
-    k = 12**0.25 / np.sqrt(h * R_loop)
+    k = 12**-0.25 / np.sqrt(h * R_loop)
     winding = (2 * n_cross + 1) * np.pi
     n_pts = max(int(winding / (2 * np.pi) * pts_per_turn), 80) + 1
     half_s = winding / (2 * k)
@@ -566,7 +559,7 @@ def plot_combined(data, out_stem="two_rod_combined"):
 
     ax_enh = fig.add_subplot(grid[0, 1])
     _draw_panel(ax_enh, data, mode="enhancement",
-                theory_label=r"theory  $1 + 3(K/k)^{2} + (K/k)^{4}/2$")
+                theory_label=r"Theory  $1 + 3(K/k)^{2} + (K/k)^{4}/2$")
 
     # Panel labels (a), (b).
     # The 3D axes get expanded above their nominal cell (see set_position

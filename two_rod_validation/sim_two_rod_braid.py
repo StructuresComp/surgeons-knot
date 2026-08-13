@@ -21,7 +21,6 @@ Units: mm, N, s throughout.
 """
 
 import numpy as np
-import scipy.sparse as sps
 import dismech
 
 
@@ -39,7 +38,8 @@ def make_two_strand_helix(h, R_loop, n_cross=1, pts_per_turn=30, R_curve=None):
     Parameters
     ----------
     h : strand cross-section radius (also = half-separation from backbone)
-    R_loop : loop radius setting the wavenumber k = 12^(1/4) / sqrt(h * R_loop)
+    R_loop : loop radius setting the wavenumber k = 12^(-1/4) / sqrt(h * R_loop)
+             = (sqrt(12) h R_loop)^(-1/2), Eq. (3) of Jawed et al. 2015
     n_cross : crossing number (winding = (2n+1)*pi per strand)
     pts_per_turn : node density
     R_curve : backbone curvature radius (None => straight backbone along z)
@@ -50,7 +50,7 @@ def make_two_strand_helix(h, R_loop, n_cross=1, pts_per_turn=30, R_curve=None):
     k : helical wavenumber
     s : (N,) backbone arc-length coordinate at each node (shared by both strands)
     """
-    k = 12**0.25 / np.sqrt(h * R_loop)
+    k = 12**-0.25 / np.sqrt(h * R_loop)
     winding = (2 * n_cross + 1) * np.pi
     n_pts = max(int(winding / (2 * np.pi) * pts_per_turn), 40) + 1
 
