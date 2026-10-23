@@ -99,7 +99,7 @@ PWIDTH, PHEIGHT = 3.5, 3.0   # single-column figure size (inches)
 PWIDTH_2COL = 7.0            # full-page width (two-panel figure)
 
 # Axis labels (kept short here; will be re-typeset in Inkscape).
-XLABEL = r"Backbone curvature ratio  $K\,/\,k$"
+XLABEL = r"Backbone curvature ratio  $K\,/\,k_{i}$"
 YLABEL_KERNEL = r"Bending kernel  $\langle |\delta''|^{2} \rangle$  (mm$^{-2}$)"
 YLABEL_PRATIO = r"Contact pressure ratio  $P\,/\,P_{\rm straight}$"
 
@@ -559,7 +559,7 @@ def plot_combined(data, out_stem="two_rod_combined"):
 
     ax_enh = fig.add_subplot(grid[0, 1])
     _draw_panel(ax_enh, data, mode="enhancement",
-                theory_label=r"Theory  $1 + 3(K/k)^{2} + (K/k)^{4}/2$")
+                theory_label=r"Theory  $1 + 3(K/k_{i})^{2} + (K/k_{i})^{4}/2$")
 
     # Panel labels (a), (b).
     # The 3D axes get expanded above their nominal cell (see set_position
